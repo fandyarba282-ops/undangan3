@@ -5,29 +5,26 @@ const parameterURL = new URLSearchParams(window.location.search);
 const namaTamu = parameterURL.get('to');
 
 if (namaTamu) {
-    // Mengubah tanda "+" atau "%20" di link WhatsApp menjadi spasi normal
+    // Mengubah tanda "+" atau "%20" menjadi spasi normal
     document.getElementById('nama-tamu-di-cover').innerText = decodeURIComponent(namaTamu.replace(/\+/g, ' '));
 }
+
+// VARIABEL BANTUAN UNTUK MEMORI MUSIK
+let waktuPutarTerakhir = 0;
+const namaFileMusik = 'musik.mp3'; // Pastikan nama file musik Anda sesuai
 
 // ==========================================
 // 2. LOGIKA TOMBOL BUKA UNDANGAN & AUDIO
 // ==========================================
 document.getElementById('tombol-buka').addEventListener('click', function() {
-    
-    // Putar musik secara otomatis
     const lagu = document.getElementById('audio-wedding');
     lagu.play().catch(function(error) {
-        console.log("Pemutaran musik otomatis tertahan keamanan browser, butuh interaksi pengguna.", error);
+        console.log("Pemutaran musik otomatis tertahan keamanan browser.", error);
     });
 
-    // Hilangkan halaman Cover depan (efek memudar)
     document.getElementById('cover-undangan').classList.add('fade-out');
-
-    // Munculkan konten utama undangan
     document.getElementById('konten-utama').classList.remove('hidden');
-
-    // Buka kunci scroll agar tamu bisa menggeser layar ke bawah
-    document.body.style.overflow = 'auto';
+    document.body.style.overflow = 'auto'; // Buka kunci scroll
 });
 
 // ==========================================
@@ -35,42 +32,44 @@ document.getElementById('tombol-buka').addEventListener('click', function() {
 // ==========================================
 const pengintaiAnimasi = new IntersectionObserver((daftarElemen) => {
     daftarElemen.forEach((isiElemen) => {
-        // Jika elemen sudah masuk ke area layar HP tamu sebanyak 10%
         if (isiElemen.isIntersecting) {
-            isiElemen.target.classList.add('active'); // Memicu efek animasi CSS berjalan
+            isiElemen.target.classList.add('active'); 
         }
     });
 }, {
-    threshold: 0.1 // Kepekaan deteksi (0.1 = 10% elemen muncul di layar)
+    threshold: 0.1 
 });
 
-// Ambil semua bagian halaman yang dipasangi kelas 'reveal'
 const semuaBagianUndangan = document.querySelectorAll('.reveal');
-
-// Daftarkan semua bagian halaman tersebut ke radar pengintai
 semuaBagianUndangan.forEach((bagian) => {
     pengintaiAnimasi.observe(bagian);
 });
 
 
 // ==========================================
-// 4. BARU: SENSOR OTOMATIS MATIKAN MUSIK SAAT KELUAR WEB
+// 4. PERBAIKAN TOTAL: LENYAPKAN POP-UP NOTIFIKASI MUSIK DI HP
 // ==========================================
 document.addEventListener('visibilitychange', function() {
     const lagu = document.getElementById('audio-wedding');
     const kontenUtama = document.getElementById('konten-utama');
-    
-    // Kita cek dulu, apakah tamu sudah pernah klik tombol "Buka Undangan" atau belum
     const sudahBukaUndangan = !kontenUtama.classList.contains('hidden');
 
-    // Jika status halaman disembunyikan (tamu pindah tab, minimize browser, atau kunci HP)
+    // JIKA TAMU KELUAR DARI WEB (MINIMIZE / PINDAH TAB / KUNCI HP)
     if (document.hidden) {
-        lagu.pause(); // Jeda (pause) musiknya seketika!
+        // Musik hanya diproses jika statusnya sedang berputar
+        if (sudahBukaUndangan && !lagu.paused) {
+            waktuPutarTerakhir = lagu.currentTime; // 1. Catat detik terakhir musik berjalan
+            lagu.src = '';                         // 2. Hapus sumber musik (INI YANG BIKIN POP-UP DI HP LENYAP!)
+            lagu.load();                           // 3. Reset sistem audio browser
+        }
     } 
-    // Jika tamu kembali membuka layar website undangan Anda
+    // JIKA TAMU KEMBALI MASUK KE WEBSITE UNDANGAN
     else {
-        // Musik hanya berputar lagi jika sebelumnya tamu sudah membuka undangan
-        if (sudahBukaUndangan) {
+        // Musik otomatis menyala lagi jika sebelumnya undangan sudah dibuka
+        if (sudahBukaUndangan && waktuPutarTerakhir > 0) {
+            lagu.src = namaFileMusik;              // 1. Pasang kembali file musiknya
+            lagu.load();                           // 2. Muat ulang filenya ke browser
+            lagu.currentTime = waktuPutarTerakhir; // 3. Lompat kembali ke detik terakhir tadi
             lagu.play().catch(function(error) {
                 console.log("Musik otomatis tertahan saat kembali ke tab:", error);
             });
