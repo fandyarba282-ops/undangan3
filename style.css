@@ -1,0 +1,209 @@
+/* PENGATURAN UMUM */
+* { 
+    box-sizing: border-box; 
+    margin: 0; 
+    padding: 0; 
+}
+
+body { 
+    font-family: 'Arial', sans-serif; 
+    /* MEREDAM BACKGROUND GAMBAR DENGAN WARNA KREM 92% */
+    background: linear-gradient(rgba(251, 248, 245, 0.92), rgba(251, 248, 245, 0.92)), 
+                url('bg-konten.jpg') no-repeat center center fixed;
+    background-size: cover; 
+    color: #4a3f35; 
+    overflow: hidden; /* Mengunci layar HP sebelum tombol diklik */
+}
+
+/* 1. TAMPILAN COVER DEPAN */
+#cover-undangan {
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100vh;
+    background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('cover.jpg') no-repeat center center/cover;
+    display: flex; 
+    justify-content: center; 
+    align-items: center;
+    z-index: 9999; 
+    text-align: center; 
+    color: white;
+    transition: all 1s ease;
+}
+
+/* Efek Memudar Saat Sampul Ditutup */
+#cover-undangan.fade-out { 
+    opacity: 0; 
+    visibility: hidden; 
+}
+
+.cover-center h1 { 
+    font-size: 2.5rem; 
+    margin: 15px 0; 
+    font-family: 'Georgia', serif; 
+}
+
+.kotak-tamu { 
+    background: rgba(255,255,255,0.2); 
+    padding: 15px; 
+    border-radius: 10px; 
+    margin: 20px 0; 
+}
+
+#tombol-buka {
+    padding: 12px 30px; 
+    font-size: 1rem; 
+    background-color: #c77d55; /* Warna Terracotta */
+    color: white; 
+    border: none; 
+    border-radius: 25px; 
+    cursor: pointer; 
+    font-weight: bold;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+/* 2. AREA KONTEN UTAMA & SLIDE */
+.hidden { 
+    display: none; 
+}
+
+section, footer { 
+    padding: 60px 20px; 
+    text-align: center; 
+}
+
+.hero-section {
+    height: 60vh; 
+    background: linear-gradient(rgba(255,255,255,0.6), rgba(255,255,255,0.6)), url('cover.jpg') no-repeat center center/cover;
+    display: flex; 
+    flex-direction: column; 
+    justify-content: center; 
+    align-items: center;
+}
+
+.hero-section h2 { 
+    font-size: 2.5rem; 
+    color: #c77d55; 
+    font-family: 'Georgia', serif;
+}
+
+.quote-section { 
+    font-style: italic; 
+}
+
+.isi-quote { 
+    max-width: 500px; 
+    margin: 15px auto; 
+    line-height: 1.6; 
+}
+
+/* 3. PROFIL MEMPELAI */
+.mempelai-flex { 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    gap: 30px; 
+    margin-top: 30px; 
+}
+
+.kartu-mempelai img { 
+    width: 150px; 
+    height: 150px; 
+    border-radius: 50%; 
+    object-fit: cover; 
+    border: 4px solid #c77d55; 
+}
+
+.kartu-mempelai h3 { 
+    margin: 15px 0 5px; 
+    color: #c77d55; 
+}
+
+.pembatas { 
+    font-size: 2rem; 
+    color: #c77d55; 
+    font-weight: bold; 
+}
+
+/* 4. DETAIL ACARA (EFEK TRANSPARAN PREMIUM) */
+.box-acara { 
+    background: rgba(255, 255, 255, 0.85); 
+    backdrop-filter: blur(5px);
+    padding: 20px; 
+    border-radius: 15px; 
+    margin-bottom: 20px; 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05); 
+}
+
+.btn-maps {
+    display: inline-block; 
+    padding: 12px 25px; 
+    background-color: #c77d55; 
+    color: white;
+    text-decoration: none; 
+    border-radius: 25px; 
+    font-weight: bold; 
+    margin-top: 15px;
+}
+
+/* 5. GRID GALERI FOTO */
+.grid-galeri { 
+    display: grid; 
+    grid-template-columns: repeat(2, 1fr); 
+    gap: 10px; 
+    margin-top: 20px; 
+}
+
+.grid-galeri img { 
+    width: 100%; 
+    height: 150px; 
+    object-fit: cover; 
+    border-radius: 8px; 
+}
+
+/* 6. KADO DIGITAL MULTI-BANK */
+.container-rekening {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-width: 400px;
+    margin: 25px auto 0;
+}
+
+.box-rekening { 
+    background: rgba(255, 255, 255, 0.85); 
+    backdrop-filter: blur(5px);
+    padding: 20px; 
+    border-radius: 15px; 
+    border: 2px dashed #c77d55; 
+    transition: transform 0.3s ease;
+}
+
+.box-rekening:hover {
+    transform: scale(1.03);
+}
+
+.nomor-rek { 
+    font-size: 1.3rem; 
+    font-weight: bold; 
+    color: #c77d55; 
+    margin: 5px 0; 
+}
+
+footer { 
+    background-color: #4a3f35; 
+    color: white; 
+}
+
+/* 7. KODE ANIMASI GERAK SCROLL (SCROLL REVEAL) */
+.reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 1.2s ease, transform 1.2s ease;
+}
+
+.reveal.active {
+    opacity: 1;
+    transform: translateY(0);
+}
