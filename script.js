@@ -51,3 +51,29 @@ const semuaBagianUndangan = document.querySelectorAll('.reveal');
 semuaBagianUndangan.forEach((bagian) => {
     pengintaiAnimasi.observe(bagian);
 });
+
+
+// ==========================================
+// 4. BARU: SENSOR OTOMATIS MATIKAN MUSIK SAAT KELUAR WEB
+// ==========================================
+document.addEventListener('visibilitychange', function() {
+    const lagu = document.getElementById('audio-wedding');
+    const kontenUtama = document.getElementById('konten-utama');
+    
+    // Kita cek dulu, apakah tamu sudah pernah klik tombol "Buka Undangan" atau belum
+    const sudahBukaUndangan = !kontenUtama.classList.contains('hidden');
+
+    // Jika status halaman disembunyikan (tamu pindah tab, minimize browser, atau kunci HP)
+    if (document.hidden) {
+        lagu.pause(); // Jeda (pause) musiknya seketika!
+    } 
+    // Jika tamu kembali membuka layar website undangan Anda
+    else {
+        // Musik hanya berputar lagi jika sebelumnya tamu sudah membuka undangan
+        if (sudahBukaUndangan) {
+            lagu.play().catch(function(error) {
+                console.log("Musik otomatis tertahan saat kembali ke tab:", error);
+            });
+        }
+    }
+});
