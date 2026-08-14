@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Absensi Pengajian</title>
+    <style>
+        :root { --primary: #059669; --bg: #f3f4f6; --text: #1f2937; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 0; }
+        .header { background-color: var(--primary); color: white; padding: 1rem; text-align: center; }
+        .nav { display: flex; background: #047857; color: white; cursor: pointer; }
+        .nav div { flex: 1; text-align: center; padding: 15px; font-weight: bold; }
+        .nav div:hover, .nav div.active { background: #064e3b; }
+        .container { max-width: 1000px; margin: 20px auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        button { background-color: var(--primary); color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        button:hover { background-color: #047857; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: var(--primary); color: white; }
+        .img-preview { max-width: 50px; border-radius: 50%; }
+        .flex-row { display: flex; gap: 10px; }
+        .status-radio { width: auto; margin-right: 5px; }
+        .radio-group { display: flex; align-items: center; gap: 10px; font-weight: normal; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h2>📚 Database & Absensi Muda-Mudi Pengajian</h2>
+    </div>
+    
+    <div class="nav">
+        <div class="tab-btn active" onclick="openTab('anggota')">👥 Data Anggota</div>
+        <div class="tab-btn" onclick="openTab('absensi')">📝 Input Absensi</div>
+        <div class="tab-btn" onclick="openTab('rekap')">📊 Rekap Bulanan</div>
+    </div>
+
+    <div class="container">
+        <!-- TAB ANGGOTA -->
+        <div id="anggota" class="tab-content active">
+            <h3>Tambah Anggota Baru</h3>
+            <form id="formAnggota" onsubmit="simpanAnggota(event)">
+                <div class="flex-row">
+                    <div class="form-group" style="flex:1;"><label>Nama Lengkap</label><input type="text" id="nama" required></div>
+                    <div class="form-group" style="flex:1;"><label>Nama Panggilan</label><input type="text" id="panggilan" required></div>
+                </div>
+                <div class="flex-row">
+                    <div class="form-group" style="flex:1;">
+                        <label>Jenis Kelamin</label>
+                        <select id="jk"><option value="L">Laki-laki</option><option value="P">Perempuan</option></select>
+                    </div>
+                    <div class="form-group" style="flex:1;"><label>Alamat / Dusun</label><input type="text" id="alamat" required></div>
+                </div>
+                <div class="flex-row">
+                    <div class="form-group" style="flex:1;"><label>No. WA Anggota</label><input type="text" id="hp"></div>
+                    <div class="form-group" style="flex:1;"><label>No. HP Ortu</label><input type="text" id="hportu" required></div>
+                </div>
+                <div class="form-group">
+                    <label>Foto (Pilih file kecil)</label>
+                    <input type="file" id="foto" accept="image/*">
+                </div>
+                <button type="submit">💾 Simpan Anggota</button>
+            </form>
+
+            <h3 style="margin-top: 30px;">Daftar Anggota</h3>
+            <table id="tabelAnggota">
+                <thead><tr><th>Foto</th><th>Nama Lengkap</th><th>Panggilan</th><th>L/P</th><th>Alamat</th><th>No HP</th><th>HP Ortu</th><th>Aksi</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <!-- TAB ABSENSI -->
+        <div id="absensi" class="tab-content">
+            <h3>Input Kehadiran</h3>
+            <div class="form-group">
+                <label>Pilih Tanggal Pengajian</label>
+                <input type="date" id="tglAbsen" onchange="loadFormAbsensi()">
+            </div>
+            <div id="formAbsensiContainer"></div>
+        </div>
+
+        <!-- TAB REKAP -->
+        <div id="rekap" class="tab-content">
+            <h3>Rekapitulasi Kehadiran Bulanan</h3>
+            <div class="form-group">
+                <label>Pilih Bulan & Tahun</label>
+                <input type="month" id="bulanRekap" onchange="hitungRekap()">
+            </div>
+            <table id="tabelRekap">
+                <thead><tr><th>Nama Lengkap</th><th>Total Pertemuan</th><th>Hadir (H)</th><th>Izin (I)</th><th>Sakit (S)</th><th>Alfa (A)</th><th>Persentase (%)</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Navigasi Tab
+        function openTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+            if(tabId === 'rekap') hitungRekap();
+            if(tabId === 'absensi') loadFormAbsensi();
+        }
+
+        // --- MANAJEMEN DATA ANGGOTA ---
+        let anggota = JSON.parse(localStorage.getItem('db_anggota')) || [];
+        
+        function simpanAnggota(e) {
+            e.preventDefault();
+            const file = document.getElementById('foto').files[0];
+            const reader = new FileReader();
+            
+            reader.onloadend = function() {
+                const data = {
+                    id: Date.now(),
+                    nama: document.getElementById('nama').value,
+                    panggilan: document.getElementById('panggilan').value,
+                    jk: document.getElementById('jk').value,
+                    alamat: document.getElementById('alamat').value,
+                    hp: document.getElementById('hp').value,
+                    hportu: document.getElementById('hportu').value,
+                    foto: file ? reader.result : '' // Simpan sebagai Base64
+                };
+                anggota.push(data);
+                localStorage.setItem('db_anggota', JSON.stringify(anggota));
+                document.getElementById('formAnggota').reset();
+                tampilAnggota();
+                alert('Data berhasil disimpan!');
+            }
+            if(file) reader.readAsDataURL(file);
+            else reader.onloadend();
+        }
+
+        function tampilAnggota() {
+            const tbody = document.querySelector('#tabelAnggota tbody');
+            tbody.innerHTML = '';
+            anggota.forEach((a, index) => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${a.foto ? `<img src="${a.foto}" class="img-preview">` : '🖼️'}</td>
+                        <td>${a.nama}</td>
+                        <td>${a.panggilan}</td>
+                        <td>${a.jk}</td>
+                        <td>${a.alamat}</td>
+                        <td>${a.hp}</td>
+                        <td>${a.hportu}</td>
+                        <td><button style="background:red; padding:5px 10px;" onclick="hapusAnggota(${index})">Hapus</button></td>
+                    </tr>
+                `;
+            });
+        }
+
+        function hapusAnggota(index) {
+            if(confirm('Yakin ingin menghapus anggota ini?')) {
+                anggota.splice(index, 1);
+                localStorage.setItem('db_anggota', JSON.stringify(anggota));
+                tampilAnggota();
+            }
+        }
+
+        // --- MANAJEMEN ABSENSI ---
+        let absensi = JSON.parse(localStorage.getItem('db_absensi')) || {};
+
+        function loadFormAbsensi() {
+            const tgl = document.getElementById('tglAbsen').value;
+            const container = document.getElementById('formAbsensiContainer');
+            if(!tgl) { container.innerHTML = '<p>Silakan pilih tanggal terlebih dahulu.</p>'; return; }
+            if(anggota.length === 0) { container.innerHTML = '<p>Belum ada data anggota.</p>'; return; }
+
+            const absenHariIni = absensi[tgl] || {};
+            let html = `<table><thead><tr><th>Nama Lengkap</th><th>Kehadiran</th><th>Keterangan</th></tr></thead><tbody>`;
+            
+            anggota.forEach(a => {
+                const status = absenHariIni[a.id]?.status || 'H';
+                const ket = absenHariIni[a.id]?.ket || '';
+                html += `
+                    <tr>
+                        <td>${a.nama}</td>
+                        <td>
+                            <div class="radio-group">
+                                <label><input type="radio" class="status-radio" name="status_${a.id}" value="H" ${status==='H'?'checked':''}> H</label>
+                                <label><input type="radio" class="status-radio" name="status_${a.id}" value="I" ${status==='I'?'checked':''}> I</label>
+                                <label><input type="radio" class="status-radio" name="status_${a.id}" value="S" ${status==='S'?'checked':''}> S</label>
+                                <label><input type="radio" class="status-radio" name="status_${a.id}" value="A" ${status==='A'?'checked':''}> A</label>
+                            </div>
+                        </td>
+                        <td><input type="text" id="ket_${a.id}" value="${ket}" placeholder="Catatan..."></td>
+                    </tr>
+                `;
+            });
+            html += `</tbody></table><br><button onclick="simpanAbsensi()">💾 Simpan Absensi Tanggal Ini</button>`;
+            container.innerHTML = html;
+        }
+
+        function simpanAbsensi() {
+            const tgl = document.getElementById('tglAbsen').value;
+            if(!tgl) return;
+            
+            let dataHariIni = {};
+            anggota.forEach(a => {
+                dataHariIni[a.id] = {
+                    status: document.querySelector(`input[name="status_${a.id}"]:checked`).value,
+                    ket: document.getElementById(`ket_${a.id}`).value
+                };
+            });
+            
+            absensi[tgl] = dataHariIni;
+            localStorage.setItem('db_absensi', JSON.stringify(absensi));
+            alert('Absensi tanggal ' + tgl + ' berhasil disimpan!');
+        }
+
+        // --- REKAPITULASI ---
+        function hitungRekap() {
+            const bulanThn = document.getElementById('bulanRekap').value; // format YYYY-MM
+            const tbody = document.querySelector('#tabelRekap tbody');
+            if(!bulanThn) { tbody.innerHTML = '<tr><td colspan="7">Pilih bulan terlebih dahulu.</td></tr>'; return; }
+
+            // Cari tanggal yang masuk dalam bulan yang dipilih
+            const tglBulanIni = Object.keys(absensi).filter(tgl => tgl.startsWith(bulanThn));
+            const totalPertemuan = tglBulanIni.length;
+
+            tbody.innerHTML = '';
+            
+            anggota.forEach(a => {
+                let H = 0, I = 0, S = 0, A = 0;
+                
+                tglBulanIni.forEach(tgl => {
+                    const status = absensi[tgl][a.id]?.status;
+                    if(status === 'H') H++;
+                    if(status === 'I') I++;
+                    if(status === 'S') S++;
+                    if(status === 'A') A++;
+                });
+
+                let persen = totalPertemuan === 0 ? 0 : Math.round((H / totalPertemuan) * 100);
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${a.nama}</td>
+                        <td>${totalPertemuan} kali</td>
+                        <td>${H}</td>
+                        <td>${I}</td>
+                        <td>${S}</td>
+                        <td>${A}</td>
+                        <td><strong>${persen}%</strong></td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Load data awal saat web dibuka
+        tampilAnggota();
+        document.getElementById('tglAbsen').valueAsDate = new Date(); // Set tgl hari ini
+        loadFormAbsensi();
+    </script>
+</body>
+</html>
